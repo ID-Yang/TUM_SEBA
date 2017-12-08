@@ -1,0 +1,81 @@
+<project name="blatt06">
+
+	<property name="src.dir" location="ejbModule" />
+	<property name="classes.dir" location="build" />
+	<property name="logic.dir" location="${src.dir}/de/tum/sebis/seba/server" />
+	<property name="client.dir" location="${src.dir}/de/tum/sebis/seba/client" />
+	<property name="clientlibs.dir" location="client_libraries" />
+	<property name="lib.dir" location="lib" />
+	<property name="lib.name" value="${ant.project.name}" />
+
+	<!-- Bitte passen Sie den Pfad zu Ihrem Wildfly AS an, benutzen Sie einen relativen Pfad wie z.B. "../../../Downloads/wildfly-10.1.0.Final" -->
+	<property name="wildfly.dir" location="../../../Downloads/wildfly-10.1.0.Final" />
+	
+	<path id="project.class.path">
+		<fileset dir="${wildfly.dir}/modules/system/layers/base/javax/ejb/api/main">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${wildfly.dir}/bin/client/jboss-client.jar" />
+	</path>
+		
+	<target name="clean-project">
+		<delete dir="${classes.dir}" />
+		<mkdir dir="${classes.dir}" />
+		<delete file="${lib.dir}/${lib.name}.jar" />
+	</target>
+
+	<target name="clean-wildfly">
+		<delete>
+			<fileset dir="${wildfly.dir}/standalone/deployments">
+				<include name="${lib.name}.jar" />
+			</fileset>
+		</delete>
+		<sleep seconds="2" />
+		<delete>
+			<fileset dir="${wildfly.dir}/standalone/deployments">
+				<include name="${lib.name}.jar.*" />
+			</fileset>
+		</delete>
+	</target>
+		        	
+	<target name="compile-server" depends="clean-project">
+		<javac srcdir="${logic.dir}" destdir="${classes.dir}" debug="on" verbose="true" includeantruntime="true">
+			<classpath refid="project.class.path" />
+		</javac>
+	</target>
+
+	<target name="compile-client">
+		<javac srcdir="${client.dir}" destdir="${classes.dir}" debug="on" verbose="true" includeantruntime="true">
+			<classpath refid="project.class.path"/>
+		</javac>
+	</target>
+
+	<target name="jar-server" depends="compile-server">
+		<jar jarfile="${lib.dir}/${lib.name}.jar">
+			<fileset dir="${classes.dir}">
+				<include name="**/*.class" />
+				<exclude name="**/client/*.class" />
+			</fileset>
+		</jar>
+	</target>
+	
+	<target name="run-client" depends="compile-client">
+		<copy file="${src.dir}/jboss-ejb-client.properties" toDir="${classes.dir}"/>
+		<java classname="de.tum.sebis.seba.client.Test" fork="yes" dir="${classes.dir}">
+			<classpath>
+				<pathelement location="${classes.dir}" />
+				<path refid="project.class.path" />
+			</classpath>
+			<jvmarg value="-Djava.util.logging.manager=java.util.logging.LogManager" />
+			<jvmarg value="-Djava.util.logging.config.file=logging.properties" />
+		</java>
+	</target>
+	
+	<!-- Bitte fuegen Sie ein Target "deploy-server" ein -->
+	
+	
+	<!-- additional: run all -->
+	
+	
+</project>
+
