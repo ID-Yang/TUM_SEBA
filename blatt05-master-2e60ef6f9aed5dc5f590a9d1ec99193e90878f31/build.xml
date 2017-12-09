@@ -1,0 +1,72 @@
+<project name="blatt05" default="main">
+	
+	<property name="src.dir" value="src" />
+	<property name="classes.dir" value="bin" />
+	<property name="jar.dir" value="${classes.dir}/jar" />
+	
+	
+	<property name="main-class" value="de.seba.blatt05.Main" />
+	
+	<!--TODO: target main einfügen HINT: achtet auf das depends-->
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: name                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="main">
+            
+    </target>
+	<!--bis hier-->
+	
+	<target name="clean" depends="main">
+		<delete dir="${classes.dir}" />
+	</target>
+	
+	<target name="compile" depends="clean">
+		<!--TODO: target compile fertigstellen HINT: neuen Ordner anlegen und javac ausführen. Nutzt die propertys-->
+		<mkdir dir="build/classes"/>
+			<javac srcdir="${src.dir}"
+	         destdir="build/classes"
+			/>
+		<!--bis hier-->
+	</target>
+
+	
+	<target name="jar" depends="compile">
+		<mkdir dir="${jar.dir}"/>
+		<jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name ="Main-Class" value="${main-class}" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="run" depends="jar">
+		<java jar="${jar.dir}/${ant.project.name}.jar" fork="true" />
+	</target>
+
+	<!-- TODO: Hausaufgabe -->
+	
+	<!--javadoc-->
+	<target name="javadoc" depends="run">
+		<mkdir dir="doc"/>
+		<javadoc destdir="doc">
+			<fileset dir="${src.dir}/" includes="**/*.java"/>
+		</javadoc>
+	</target>
+	<!--hier end javadoc-->
+	
+	<!--release management-->
+	<target name="newRelease">
+		<input message="What is the version of the release?" addproperty="var">
+		</input>
+		<mkdir dir="release"/>
+		<mkdir dir="release/${var}"/>
+		<copy todir="release/${var}">
+			<fileset dir="${jar.dir}/${ant.project.name}.jar" includes="**"></fileset>
+		</copy>
+		<copy todir="release/${var}">
+			<fileset dir="doc" includes="**"></fileset>
+		</copy>
+	</target>
+	
+	
+</project>
